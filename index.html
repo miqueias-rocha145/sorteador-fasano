@@ -741,6 +741,11 @@
                 <button id="btn-start-draw" class="btn-draw-main" onclick="startDraw()">
                     INICIAR SORTEIO
                 </button>
+
+                <div class="speed-control" style="width: 100%; max-width: 300px; margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <label for="speed-slider" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Velocidade do Sorteio: <span id="speed-display">5x</span></label>
+                    <input type="range" id="speed-slider" min="1" max="10" value="5" style="width: 100%; cursor: pointer; accent-color: var(--primary-color);" oninput="updateSpeedDisplay()">
+                </div>
             </div>
         </main>
 
@@ -1098,6 +1103,14 @@
          */
         let isDrawing = false;
 
+        function updateSpeedDisplay() {
+            const slider = document.getElementById('speed-slider');
+            const display = document.getElementById('speed-display');
+            if (slider && display) {
+                display.textContent = `${slider.value}x`;
+            }
+        }
+
         function startDraw() {
             if (isDrawing) return;
 
@@ -1191,8 +1204,15 @@
             
             track.offsetHeight; // Force reflow novamente
             
+            // Lógica de tempo do sorteio
+            const speedSlider = document.getElementById('speed-slider');
+            const speedMultiplier = speedSlider ? parseInt(speedSlider.value) : 5;
+            // 1x = 20s (mais lento), 5x = 12s, 10x = 2s (mais rápido)
+            const durationSec = 22 - (speedMultiplier * 2);
+            const durationMs = durationSec * 1000;
+
             // Start animation
-            track.style.transition = 'transform 12s cubic-bezier(0.1, 0.7, 0.1, 1)';
+            track.style.transition = `transform ${durationSec}s cubic-bezier(0.1, 0.7, 0.1, 1)`;
             track.style.transform = `translateX(${targetTranslateX}px)`;
 
             setTimeout(() => {
@@ -1223,7 +1243,7 @@
 
                 isDrawing = false;
                 document.getElementById('btn-start-draw').disabled = false;
-            }, 12000);
+            }, durationMs);
         }
 
         /**

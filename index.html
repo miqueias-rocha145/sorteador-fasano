@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arraiá de Sorteios</title>
+    <!-- Ícone da aba do navegador (Favicon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #8c2a1c;
+            --bg-panel: rgba(255, 240, 215, 0.95);
+            --border-color: rgba(139, 69, 19, 0.3);
+            --text-primary: #4a2511;
+            --text-secondary: #8b4513;
+            --primary-color: #d84315;
+            --primary-hover: #bf360c;
+            --success-color: #2e7d32;
+            --danger-color: #c62828;
+            --danger-hover: #b71c1c;
+            --glow-primary: rgba(216, 67, 21, 0.4);
+            --glow-success: rgba(46, 125, 50, 0.4);
+            --festa-blue: #0277bd;
+            --festa-yellow: #fbc02d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: 
+                repeating-linear-gradient(45deg, rgba(200, 50, 30, 0.08) 0px, rgba(200, 50, 30, 0.08) 20px, transparent 20px, transparent 40px),
+                repeating-linear-gradient(-45deg, rgba(200, 50, 30, 0.08) 0px, rgba(200, 50, 30, 0.08) 20px, transparent 20px, transparent 40px),
+                radial-gradient(circle at center, #ffecb3 0%, #ffcc80 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            padding: 24px;
+            gap: 24px;
+            z-index: 10;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border-radius: 20px;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px dashed var(--primary-color);
+            box-shadow: 0 8px 32px rgba(139, 69, 19, 0.2);
+        }
+
+        .side-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 380px;
+        }
+
+        .center-panel {
+            flex: 2;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            padding: 0;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 0.5px;
+        }
+
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        /* Stats Component */
+        .stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Elements */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Buttons */
+        button {
+            cursor: pointer;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px var(--glow-primary);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-color);
+            color: white;
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-icon {
+            padding: 12px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Lists */
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            padding-right: 5px;
+        }
+
+        .list-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .item-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+            word-break: break-word;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .item-status {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+
+        .item-status.drawn {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .btn-delete:hover {
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Center Draw Area */
+        .draw-box {
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            border: 3px dashed var(--primary-color);
+            border-radius: 32px;
+            padding: 50px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(139, 69, 19, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .draw-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(216, 67, 21, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .name-display-container {
+            width: 100%;
+            min-height: 160px;
+            background: #fff3e0;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            border: 2px dashed #ff9800;
+            box-shadow: inset 0 5px 15px rgba(139, 69, 19, 0.2);
+            z-index: 1;
+        }
+
+        .name-display-container::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 30px;
+            height: 35px;
+            background: var(--festa-blue);
+            clip-path: polygon(0 100%, 100% 100%, 100% 0, 50% 30%, 0 0);
+            transform: translateX(-50%);
+            z-index: 5;
+            filter: drop-shadow(0 -2px 3px rgba(0, 0, 0, 0.3));
+        }
+
+        .name-display-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 30px;
+            height: 35px;
+            background: var(--danger-color);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%);
+            transform: translateX(-50%);
+            z-index: 5;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+        }
+
+        .roulette-track {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .roulette-item {
+            min-width: min(280px, 50vw);
+            width: max-content;
+            padding: 0 30px;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: clamp(0.7rem, 1.4vw, 1.2rem);
+            font-weight: 800;
+            color: rgba(139, 69, 19, 0.5);
+            white-space: nowrap;
+            transition: color 0.3s, transform 0.3s, opacity 0.5s ease;
+        }
+
+        .roulette-item.winner {
+            color: #d84315;
+            text-shadow: 0 0 15px rgba(216, 67, 21, 0.4);
+            transform: scale(1.25);
+        }
+
+        .roulette-track.finished .roulette-item:not(.winner) {
+            opacity: 0;
+        }
+
+        .btn-draw-main {
+            font-size: 1.3rem;
+            font-weight: 800;
+            padding: 20px 50px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--primary-color), #6366f1);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.2);
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-draw-main:hover:not(:disabled) {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 35px var(--glow-primary), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-draw-main:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-draw-main:disabled {
+            background: #475569;
+            color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .winner-message {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            padding: 0 30px;
+            border-radius: 16px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(20px) scale(0.9);
+            z-index: 10;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            text-align: center;
+        }
+
+        .winner-message.show {
+            opacity: 1;
+            max-height: 200px;
+            padding: 15px 30px;
+            transform: translateY(0) scale(1);
+            margin-bottom: -15px;
+            margin-top: -15px;
+        }
+
+        /* Winners Table */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            table-layout: fixed;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            z-index: 2;
+        }
+
+        th:nth-child(1) {
+            width: 55px;
+        }
+
+        th:nth-child(3) {
+            width: 90px;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .td-order {
+            font-weight: 800;
+            color: var(--primary-color);
+            white-space: nowrap;
+            word-break: normal;
+        }
+
+        .td-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.2;
+        }
+
+        /* Toasts */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--primary-color);
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .toast.success {
+            border-left-color: var(--success-color);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+                padding: 15px;
+            }
+
+            body {
+                overflow-y: auto;
+            }
+
+            .panel {
+                height: auto;
+                min-height: 500px;
+            }
+
+            .side-panel {
+                max-width: 100%;
+            }
+
+            .center-panel {
+                order: -1;
+                min-height: 400px;
+            }
+        }
+
+        /* SVG Icons */
+        svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div id="toast-container"></div>
+
+    <div class="app-container">
+        <!-- PAINEL ESQUERDO: Participantes -->
+        <aside class="panel side-panel glass">
+            <h2>Participantes</h2>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total Cadastrado</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-available" style="color: var(--success-color)">0</div>
+                    <div class="stat-label">Aptos ao Sorteio</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h3>Adicionar Participantes</h3>
+                <div class="input-group">
+                    <input type="text" id="input-single-name" placeholder="Digite um nome..."
+                        onkeypress="handleEnter(event)">
+                    <button class="btn-primary btn-icon" onclick="addSingleParticipant()" title="Adicionar Nome">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                    </button>
+                </div>
+
+                <textarea id="input-bulk-names" placeholder="Cole vários nomes aqui (um por linha)..."></textarea>
+                <button class="btn-secondary" style="width: 100%; margin-top: 8px;" onclick="addBulkParticipants()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    Adicionar Lista
+                </button>
+
+                <div class="input-group" style="margin-top: 8px;">
+                    <button class="btn-secondary" style="flex: 1;"
+                        onclick="document.getElementById('file-import').click()">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Importar Arquivo (.txt, .csv)
+                    </button>
+                    <input type="file" id="file-import" accept=".txt,.csv" onchange="importFromFile(event)"
+                        style="display: none;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Lista de Nomes</h3>
+                <button class="btn-danger btn-icon" style="padding: 6px 10px; font-size: 0.8rem;"
+                    onclick="clearParticipants()">
+                    <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Limpar
+                </button>
+            </div>
+
+            <div class="list-container" id="participants-list">
+                <!-- Nomes renderizados aqui -->
+            </div>
+        </aside>
+
+        <!-- PAINEL CENTRAL: Área de Sorteio -->
+        <main class="panel center-panel">
+
+            <div class="draw-box">
+                <div class="winner-message" id="winner-msg">🎉 Parabéns, Nome!</div>
+
+                <div class="name-display-container" id="roulette-container">
+                    <div class="roulette-track" id="roulette-track" style="justify-content: center; width: 100%;">
+                        <div class="roulette-item" id="name-slot" style="color: var(--primary-color);">Pronto pro Sorteio!</div>
+                    </div>
+                </div>
+
+                <button id="btn-start-draw" class="btn-draw-main" onclick="startDraw()">
+                    INICIAR SORTEIO
+                </button>
+            </div>
+        </main>
+
+        <!-- PAINEL DIREITO: Ganhadores e Histórico -->
+        <aside class="panel side-panel glass">
+            <h2>Ganhadores</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Nome</th>
+                            <th>Data/Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winners-tbody">
+                        <!-- Ganhadores renderizados aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
+                <button class="btn-secondary" onclick="exportWinnersCSV()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Ganhadores (CSV)
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="exportBackup()">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Backup
+                    </button>
+                    <button class="btn-secondary" style="flex: 1;"
+                        onclick="document.getElementById('file-restore').click()">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 2v6h-6"></path>
+                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                            <path d="M3 22v-6h6"></path>
+                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                        </svg>
+                        Restaurar
+                    </button>
+                    <input type="file" id="file-restore" accept=".json" onchange="importBackup(event)"
+                        style="display: none;">
+                </div>
+                <button class="btn-danger" style="margin-top: 10px;" onclick="clearHistory()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                        <line x1="18" y1="9" x2="12" y2="15"></line>
+                        <line x1="12" y1="9" x2="18" y2="15"></line>
+                    </svg>
+                    Zerar Todo o Histórico
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        /**
+         * ESTADO E PERSISTÊNCIA
+         */
+        let state = {
+            participants: [], // { id, name, drawn: boolean }
+            winners: []       // { id, name, date, order }
+        };
+
+        const STORAGE_KEY = 'sorteio_pro_data';
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            updateUI();
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    state = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Erro ao ler localStorage', e);
+                }
+            }
+            updateUI();
+        }
+
+        function getAvailableParticipants() {
+            return state.participants.filter(p => !p.drawn);
+        }
+
+        /**
+         * MANIPULAÇÃO DE PARTICIPANTES
+         */
+        function addParticipant(name) {
+            name = name.trim();
+            if (!name) return false;
+
+            state.participants.push({
+                id: generateId(),
+                name: name,
+                drawn: false
+            });
+            return true;
+        }
+
+        function addSingleParticipant() {
+            const input = document.getElementById('input-single-name');
+            const name = input.value;
+            if (addParticipant(name)) {
+                input.value = '';
+                saveState();
+                showToast(`"${name}" adicionado com sucesso!`, 'success');
+            } else {
+                showToast('Digite um nome válido.', 'error');
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') addSingleParticipant();
+        }
+
+        function addBulkParticipants() {
+            const textarea = document.getElementById('input-bulk-names');
+            const text = textarea.value;
+            const names = text.split(/\n/).map(n => n.trim()).filter(n => n);
+
+            if (names.length === 0) {
+                showToast('A lista está vazia.', 'error');
+                return;
+            }
+
+            let count = 0;
+            names.forEach(name => {
+                if (addParticipant(name)) count++;
+            });
+
+            textarea.value = '';
+            saveState();
+            showToast(`${count} participantes adicionados!`, 'success');
+        }
+
+        function removeParticipant(id) {
+            state.participants = state.participants.filter(p => p.id !== id);
+            saveState();
+        }
+
+        function clearParticipants() {
+            if (confirm('Tem certeza que deseja apagar TODOS os participantes? Isso não apagará o histórico de ganhadores.')) {
+                state.participants = [];
+                saveState();
+                showToast('Lista de participantes apagada.', 'success');
+            }
+        }
+
+        function importFromFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const text = event.target.result;
+                const isCSV = file.name.toLowerCase().endsWith('.csv');
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+
+                let count = 0;
+                lines.forEach(line => {
+                    let name = line;
+                    if (isCSV) {
+                        // Assume first column is the name
+                        const parts = line.split(',');
+                        name = parts[0].replace(/['"]/g, '').trim();
+                    }
+                    if (addParticipant(name)) count++;
+                });
+
+                saveState();
+                showToast(`${count} participantes importados de ${file.name}!`, 'success');
+                e.target.value = ''; // reset input
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * HISTÓRICO E EXPORTAÇÃO
+         */
+        function clearHistory() {
+            if (confirm('ATENÇÃO: Deseja apagar todo o histórico de sorteios e ganhadores? Esta ação não pode ser desfeita.')) {
+                state.winners = [];
+                // Reset drawn status from participants
+                state.participants.forEach(p => p.drawn = false);
+                saveState();
+                showToast('Histórico zerado com sucesso.', 'success');
+
+                // Reset UI central
+                const track = document.getElementById('roulette-track');
+                track.classList.remove('finished');
+                track.style.transition = 'none';
+                track.style.transform = 'translateX(0px)';
+                track.style.justifyContent = 'center';
+                track.style.width = '100%';
+                track.innerHTML = '<div class="roulette-item" id="name-slot" style="color: var(--primary-color);">Pronto pro Sorteio!</div>';
+                document.getElementById('winner-msg').classList.remove('show');
+            }
+        }
+
+        function exportWinnersCSV() {
+            if (state.winners.length === 0) {
+                showToast('Não há ganhadores para exportar.', 'error');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Ordem,Nome,Data e Hora\n";
+
+            state.winners.forEach(w => {
+                const safeName = w.name.replace(/"/g, '""');
+                csvContent += `${w.order},"${safeName}","${w.date}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `ganhadores_sorteio_${new Date().getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Arquivo CSV gerado com sucesso.', 'success');
+        }
+
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `sorteio_backup_${new Date().getTime()}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            document.body.removeChild(dlAnchorElem);
+            showToast('Backup exportado com sucesso!', 'success');
+        }
+
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data && Array.isArray(data.participants) && Array.isArray(data.winners)) {
+                        state = data;
+                        saveState();
+                        showToast('Backup restaurado com sucesso!', 'success');
+                    } else {
+                        showToast('Arquivo de backup inválido.', 'error');
+                    }
+                } catch (err) {
+                    showToast('Erro ao ler arquivo JSON.', 'error');
+                }
+                e.target.value = ''; // reset
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * ATUALIZAÇÃO DA INTERFACE (UI)
+         */
+        function updateUI() {
+            const available = getAvailableParticipants();
+
+            // Stats
+            document.getElementById('stat-total').textContent = state.participants.length;
+            document.getElementById('stat-available').textContent = available.length;
+
+            // Participants List
+            const listEl = document.getElementById('participants-list');
+            listEl.innerHTML = '';
+
+            // Render from newest to oldest for better UX, or just sequence
+            [...state.participants].reverse().forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+
+                const infoDiv = document.createElement('div');
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'item-name';
+                nameSpan.textContent = p.name;
+                infoDiv.appendChild(nameSpan);
+
+                if (p.drawn) {
+                    const badge = document.createElement('span');
+                    badge.className = 'item-status drawn';
+                    badge.style.marginLeft = '10px';
+                    badge.textContent = 'Sorteado';
+                    infoDiv.appendChild(badge);
+                }
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-delete';
+                delBtn.innerHTML = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                delBtn.onclick = () => removeParticipant(p.id);
+
+                item.appendChild(infoDiv);
+                item.appendChild(delBtn);
+                listEl.appendChild(item);
+            });
+
+            // Winners Table
+            const tbody = document.getElementById('winners-tbody');
+            tbody.innerHTML = '';
+
+            // Order by newest first
+            [...state.winners].sort((a, b) => b.order - a.order).forEach(w => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="td-order">#${w.order}</td>
+                    <td style="font-weight: 600;">${w.name}</td>
+                    <td class="td-date">${w.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icon = type === 'success'
+                ? '<svg style="color:var(--success-color)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+                : '<svg style="color:var(--danger-color)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+
+        /**
+         * LÓGICA DE SORTEIO E ANIMAÇÃO
+         */
+        let isDrawing = false;
+
+        function startDraw() {
+            if (isDrawing) return;
+
+            const available = getAvailableParticipants();
+            if (available.length === 0) {
+                showToast('Não há participantes aptos para o sorteio!', 'error');
+                return;
+            }
+
+            isDrawing = true;
+            document.getElementById('btn-start-draw').disabled = true;
+
+            const winnerMsg = document.getElementById('winner-msg');
+            const track = document.getElementById('roulette-track');
+
+            // Reset UI
+            winnerMsg.classList.remove('show');
+            track.classList.remove('finished');
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0px)';
+            track.style.justifyContent = 'flex-start';
+            track.style.width = 'max-content';
+
+            // Select Winner
+            const winnerIndex = Math.floor(Math.random() * available.length);
+            const winner = available[winnerIndex];
+
+            // Build sequence of names
+            const itemsCount = 30; 
+            const winnerPosition = 20; 
+            
+            track.innerHTML = '';
+            
+            // Vamos criar um array para armazenar os nomes nas posições corretas
+            const slots = new Array(itemsCount).fill('');
+            slots[winnerPosition] = winner.name;
+            
+            // Função auxiliar para escolher um nome válido e evitar repetições próximas
+            const getValidName = (avoidName1, avoidName2) => {
+                // Tenta evitar os dois últimos nomes para maior diversidade (útil se tiver >= 3 participantes)
+                let options = available.filter(p => p.name !== avoidName1 && p.name !== avoidName2);
+                
+                if (options.length === 0) {
+                    // Se não for possível evitar dois, tenta evitar pelo menos o vizinho imediato
+                    options = available.filter(p => p.name !== avoidName1);
+                }
+                
+                if (options.length === 0) {
+                    // Fallback se houver apenas 1 participante
+                    options = available;
+                }
+                return options[Math.floor(Math.random() * options.length)].name;
+            };
+            
+            // Preenche de trás pra frente a partir do vencedor (para não haver choque na posição 19)
+            for (let i = winnerPosition - 1; i >= 0; i--) {
+                slots[i] = getValidName(slots[i + 1], slots[i + 2] || '');
+            }
+            
+            // Preenche pra frente a partir do vencedor
+            for (let i = winnerPosition + 1; i < itemsCount; i++) {
+                slots[i] = getValidName(slots[i - 1], slots[i - 2] || '');
+            }
+            
+            // Renderiza no DOM
+            for (let i = 0; i < itemsCount; i++) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'roulette-item';
+                itemDiv.textContent = slots[i];
+                if (i === winnerPosition) {
+                    itemDiv.id = 'winner-item';
+                }
+                track.appendChild(itemDiv);
+            }
+
+            // Force reflow para medir larguras
+            track.offsetHeight;
+
+            const winnerItem = document.getElementById('winner-item');
+            const itemWidth = winnerItem.offsetWidth;
+            const containerWidth = document.getElementById('roulette-container').offsetWidth;
+            
+            // Queremos centralizar o vencedor
+            const winnerCenter = winnerItem.offsetLeft + (itemWidth / 2);
+            const targetTranslateX = (containerWidth / 2) - winnerCenter;
+
+            // Iniciar com o primeiro item centralizado
+            const firstItemCenter = track.children[0].offsetLeft + (track.children[0].offsetWidth / 2);
+            const initialOffset = (containerWidth / 2) - firstItemCenter;
+            track.style.transform = `translateX(${initialOffset}px)`;
+            
+            track.offsetHeight; // Force reflow novamente
+            
+            // Start animation
+            track.style.transition = 'transform 12s cubic-bezier(0.1, 0.7, 0.1, 1)';
+            track.style.transform = `translateX(${targetTranslateX}px)`;
+
+            setTimeout(() => {
+                const winEl = document.getElementById('winner-item');
+                if (winEl) {
+                    winEl.className = 'roulette-item winner';
+                }
+                
+                track.classList.add('finished');
+
+                winnerMsg.textContent = `🎉 Parabéns, ${winner.name}!`;
+                winnerMsg.classList.add('show');
+
+                // Mark as drawn and add to winners
+                const pIndex = state.participants.findIndex(p => p.id === winner.id);
+                if (pIndex > -1) state.participants[pIndex].drawn = true;
+
+                const order = state.winners.length + 1;
+                state.winners.push({
+                    id: winner.id,
+                    name: winner.name,
+                    date: new Date().toLocaleString('pt-BR'),
+                    order: order
+                });
+
+                saveState();
+                fireConfetti();
+
+                isDrawing = false;
+                document.getElementById('btn-start-draw').disabled = false;
+            }, 12000);
+        }
+
+        /**
+         * SISTEMA DE CONFETES EM CANVAS
+         */
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let confettiAnimationId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function fireConfetti() {
+            // Cores de festa junina: Amarelo, Laranja, Vermelho, Azul, Verde
+            const colors = ['#fbc02d', '#f57c00', '#d32f2f', '#0288d1', '#388e3c', '#ffeb3b'];
+            particles = []; // clear existing
+
+            for (let i = 0; i < 200; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 + 50,
+                    r: Math.random() * 6 + 4,
+                    dx: Math.random() * 30 - 15,
+                    dy: Math.random() * -25 - 10,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 10,
+                    tiltAngleInc: (Math.random() * 0.07) + 0.05,
+                    tiltAngle: 0
+                });
+            }
+
+            if (!confettiAnimationId) {
+                renderConfetti();
+            }
+        }
+
+        function renderConfetti() {
+            if (particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiAnimationId = null;
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let remaining = [];
+
+            particles.forEach(p => {
+                p.tiltAngle += p.tiltAngleInc;
+                p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle) * 2;
+                p.dy += 0.3; // Gravidade
+                p.y += p.dy;
+                p.x += p.dx;
+
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+                ctx.stroke();
+
+                // Keep if visible
+                if (p.y <= canvas.height + 20 && p.x >= -20 && p.x <= canvas.width + 20) {
+                    remaining.push(p);
+                }
+            });
+
+            particles = remaining;
+            confettiAnimationId = requestAnimationFrame(renderConfetti);
+        }
+
+        // Initialize App
+        loadState();
+
+    </script>
+</body>
+
+</html>

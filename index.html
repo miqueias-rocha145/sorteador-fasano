@@ -745,6 +745,11 @@
                 <div class="speed-control" style="width: 100%; max-width: 300px; margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
                     <label for="speed-slider" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Velocidade do Sorteio: <span id="speed-display">5x</span></label>
                     <input type="range" id="speed-slider" min="1" max="10" value="5" style="width: 100%; cursor: pointer; accent-color: var(--primary-color);" oninput="updateSpeedDisplay()">
+                    
+                    <label style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.color='var(--danger-color)'" onmouseout="this.style.color='var(--text-secondary)'">
+                        <input type="checkbox" id="troll-mode" style="width: 18px; height: 18px; accent-color: var(--danger-color); cursor: pointer;">
+                        Modo Sorteio Troll 🤪
+                    </label>
                 </div>
             </div>
         </main>
@@ -1209,11 +1214,42 @@
             const speedMultiplier = speedSlider ? parseInt(speedSlider.value) : 5;
             // 1x = 20s (mais lento), 5x = 12s, 10x = 2s (mais rápido)
             const durationSec = 22 - (speedMultiplier * 2);
-            const durationMs = durationSec * 1000;
+            let durationMs = durationSec * 1000;
 
             // Start animation
             track.style.transition = `transform ${durationSec}s cubic-bezier(0.1, 0.7, 0.1, 1)`;
             track.style.transform = `translateX(${targetTranslateX}px)`;
+
+            let finalWinner = winner;
+            let finalWinnerPosition = winnerPosition;
+
+            const trollCheckbox = document.getElementById('troll-mode');
+            if (trollCheckbox && trollCheckbox.checked) {
+                const actions = ['normal', 'next', 'prev'];
+                const action = actions[Math.floor(Math.random() * actions.length)];
+
+                if (action !== 'normal') {
+                    const slipTime = durationMs - 600; // Trigger the slip slightly before it fully stops
+                    
+                    setTimeout(() => {
+                        const shift = action === 'next' ? -itemWidth : itemWidth;
+                        finalWinnerPosition = action === 'next' ? winnerPosition + 1 : winnerPosition - 1;
+                        
+                        const newWinnerName = slots[finalWinnerPosition];
+                        finalWinner = available.find(p => p.name === newWinnerName) || winner;
+
+                        // Add a quick, bouncy transition to simulate a slip
+                        track.style.transition = `transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)`;
+                        track.style.transform = `translateX(${targetTranslateX + shift}px)`;
+                        
+                        document.getElementById('winner-item').removeAttribute('id');
+                        track.children[finalWinnerPosition].id = 'winner-item';
+                    }, slipTime);
+
+                    // Extend the total duration to wait for the troll slip to complete
+                    durationMs = slipTime + 800; 
+                }
+            }
 
             setTimeout(() => {
                 const winEl = document.getElementById('winner-item');
@@ -1223,17 +1259,17 @@
                 
                 track.classList.add('finished');
 
-                winnerMsg.textContent = `🎉 Parabéns, ${winner.name}!`;
+                winnerMsg.textContent = `🎉 Parabéns, ${finalWinner.name}!`;
                 winnerMsg.classList.add('show');
 
                 // Mark as drawn and add to winners
-                const pIndex = state.participants.findIndex(p => p.id === winner.id);
+                const pIndex = state.participants.findIndex(p => p.id === finalWinner.id);
                 if (pIndex > -1) state.participants[pIndex].drawn = true;
 
                 const order = state.winners.length + 1;
                 state.winners.push({
-                    id: winner.id,
-                    name: winner.name,
+                    id: finalWinner.id,
+                    name: finalWinner.name,
                     date: new Date().toLocaleString('pt-BR'),
                     order: order
                 });

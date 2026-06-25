@@ -400,6 +400,7 @@
             align-items: center;
             height: 100%;
             will-change: transform;
+            position: relative;
         }
 
         .roulette-item {
@@ -1196,7 +1197,7 @@
 
             const winnerItem = document.getElementById('winner-item');
             const itemWidth = winnerItem.offsetWidth;
-            const containerWidth = document.getElementById('roulette-container').offsetWidth;
+            const containerWidth = document.getElementById('roulette-container').clientWidth;
             
             // Queremos centralizar o vencedor
             const winnerCenter = winnerItem.offsetLeft + (itemWidth / 2);
@@ -1232,18 +1233,22 @@
                     const slipTime = durationMs - 600; // Trigger the slip slightly before it fully stops
                     
                     setTimeout(() => {
-                        const shift = action === 'next' ? -itemWidth : itemWidth;
                         finalWinnerPosition = action === 'next' ? winnerPosition + 1 : winnerPosition - 1;
                         
                         const newWinnerName = slots[finalWinnerPosition];
                         finalWinner = available.find(p => p.name === newWinnerName) || winner;
 
+                        const newWinnerItem = track.children[finalWinnerPosition];
+                        const currentContainerWidth = document.getElementById('roulette-container').clientWidth;
+                        const newWinnerCenter = newWinnerItem.offsetLeft + (newWinnerItem.offsetWidth / 2);
+                        const newTargetTranslateX = (currentContainerWidth / 2) - newWinnerCenter;
+
                         // Add a quick, bouncy transition to simulate a slip
                         track.style.transition = `transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)`;
-                        track.style.transform = `translateX(${targetTranslateX + shift}px)`;
+                        track.style.transform = `translateX(${newTargetTranslateX}px)`;
                         
                         document.getElementById('winner-item').removeAttribute('id');
-                        track.children[finalWinnerPosition].id = 'winner-item';
+                        newWinnerItem.id = 'winner-item';
                     }, slipTime);
 
                     // Extend the total duration to wait for the troll slip to complete
@@ -1255,6 +1260,13 @@
                 const winEl = document.getElementById('winner-item');
                 if (winEl) {
                     winEl.className = 'roulette-item winner';
+                    
+                    // Snap to perfect center just in case window was resized or fonts loaded
+                    const finalContainerWidth = document.getElementById('roulette-container').clientWidth;
+                    const finalWinnerCenter = winEl.offsetLeft + (winEl.offsetWidth / 2);
+                    const finalTranslateX = (finalContainerWidth / 2) - finalWinnerCenter;
+                    track.style.transition = 'transform 0.3s ease';
+                    track.style.transform = `translateX(${finalTranslateX}px)`;
                 }
                 
                 track.classList.add('finished');
